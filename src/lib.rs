@@ -1,12 +1,12 @@
-enum Stack {
-    Cons(i32, Box<Stack>),
+enum Stack<T> {
+    Cons(T, Box<Stack<T>>),
     Nil,
 }
 
 use self::Stack::*;
 
-impl Stack {
-    fn empty() -> Stack {
+impl<T: Copy> Stack<T> {
+    fn empty() -> Stack<T> {
         Nil
     }
 
@@ -17,18 +17,18 @@ impl Stack {
         }
     }
 
-    fn cons(self, s: i32) -> Stack {
+    fn cons(self, s: T) -> Stack<T> {
         Cons(s, Box::new(self))
     }
 
-    fn head(&self) -> Option<i32> {
+    fn head(&self) -> Option<T> {
         match self {
             Nil => None,
             Cons(x, _) => Some(*x),
         }
     }
 
-    fn tail(self) -> Option<Stack> {
+    fn tail(self) -> Option<Stack<T>> {
         match self {
             Nil => None,
             Cons(_, x) => Some(*x),
@@ -38,7 +38,7 @@ impl Stack {
 
 #[test]
 fn stack_test() {
-    let stack = Stack::empty();
+    let stack: Stack<i32> = Stack::empty();
     assert_eq!(stack.is_empty(), true);
     let stack2 = Stack::empty().cons(1).cons(2);
     assert_eq!(stack2.is_empty(), false);
