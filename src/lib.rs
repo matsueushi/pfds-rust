@@ -1,12 +1,20 @@
-enum Stack<T> {
-    Cons(T, Box<Stack<T>>),
+trait Stack<T>: Sized {
+    fn empty() -> Self;
+    fn is_empty(&self) -> bool;
+    fn cons(self, _: T) -> Self;
+    fn head(&self) -> Option<T>;
+    fn tail(self) -> Option<Self>;
+}
+
+enum CustomStack<T> {
+    Cons(T, Box<CustomStack<T>>),
     Nil,
 }
 
-use self::Stack::*;
+use self::CustomStack::*;
 
-impl<T: Copy> Stack<T> {
-    fn empty() -> Stack<T> {
+impl<T: Copy> Stack<T> for CustomStack<T> {
+    fn empty() -> CustomStack<T> {
         Nil
     }
 
@@ -17,7 +25,7 @@ impl<T: Copy> Stack<T> {
         }
     }
 
-    fn cons(self, s: T) -> Stack<T> {
+    fn cons(self, s: T) -> CustomStack<T> {
         Cons(s, Box::new(self))
     }
 
@@ -28,7 +36,7 @@ impl<T: Copy> Stack<T> {
         }
     }
 
-    fn tail(self) -> Option<Stack<T>> {
+    fn tail(self) -> Option<CustomStack<T>> {
         match self {
             Nil => None,
             Cons(_, x) => Some(*x),
@@ -38,9 +46,9 @@ impl<T: Copy> Stack<T> {
 
 #[test]
 fn stack_test() {
-    let stack: Stack<i32> = Stack::empty();
+    let stack: CustomStack<i32> = CustomStack::empty();
     assert_eq!(stack.is_empty(), true);
-    let stack2 = Stack::empty().cons(1).cons(2);
+    let stack2 = CustomStack::empty().cons(1).cons(2);
     assert_eq!(stack2.is_empty(), false);
     assert_eq!(stack2.head(), Some(2));
     assert_eq!(stack2.tail().unwrap().head(), Some(1));
