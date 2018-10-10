@@ -1,42 +1,47 @@
-enum CustomStack {
-    Cons(i32, Box<CustomStack>),
+enum Stack {
+    Cons(i32, Box<Stack>),
     Nil,
 }
 
-struct Stack {
-    head: CustomStack,
-}
-
-use self::CustomStack::*;
+use self::Stack::*;
 
 impl Stack {
     fn empty() -> Stack {
-        Stack { head: Nil }
+        Nil
     }
 
     fn is_empty(&self) -> bool {
-        match self.head {
+        match self {
             Nil => true,
             _ => false,
         }
     }
 
-    fn cons(&mut self, s: i32) -> &mut Stack {
-        self.head = Cons(s, Box::new(::std::mem::replace(&mut self.head, Nil)));
-        self
+    fn cons(self, s: i32) -> Stack {
+        Cons(s, Box::new(self))
     }
 
     fn head(&self) -> Option<i32> {
-        match self.head {
+        match self {
             Nil => None,
-            Cons(x, _) => Some(x),
+            Cons(x, _) => Some(*x),
+        }
+    }
+
+    fn tail(self) -> Option<Stack> {
+        match self {
+            Nil => None,
+            Cons(_, x) => Some(*x),
         }
     }
 }
 
 #[test]
 fn stack_test() {
-    let mut stack = Stack::empty();
+    let stack = Stack::empty();
     assert_eq!(stack.is_empty(), true);
-    assert_eq!(stack.cons(32).head(), Some(32));
+    let stack2 = Stack::empty().cons(1).cons(2);
+    assert_eq!(stack2.is_empty(), false);
+    assert_eq!(stack2.head(), Some(2));
+    assert_eq!(stack2.tail().unwrap().head(), Some(1));
 }
