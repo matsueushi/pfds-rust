@@ -17,7 +17,7 @@ struct CustomStack<T> {
 
 use self::StackNode::*;
 
-impl<T: Copy> Stack<T> for CustomStack<T> {
+impl<T> Stack<T> for CustomStack<T> {
     fn empty() -> CustomStack<T> {
         CustomStack { node: Nil }
     }
@@ -57,7 +57,7 @@ struct LinkedListStack<T> {
     node: LinkedList<T>,
 }
 
-impl<T: Copy> Stack<T> for LinkedListStack<T> {
+impl<T> Stack<T> for LinkedListStack<T> {
     fn empty() -> LinkedListStack<T> {
         LinkedListStack { node: LinkedList::new() }
     }
