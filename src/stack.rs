@@ -1,3 +1,5 @@
+// 2.1 List
+
 trait Stack<T>: Sized {
     fn empty() -> Self;
     fn is_empty(&self) -> bool;
