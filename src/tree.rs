@@ -51,18 +51,41 @@ where
         }
     }
 
+    // Section 2.2 first version
+
+    //    fn member(&self, elt: &T) -> bool {
+    //        match self {
+    //            Empty => false,
+    //            Node { val, ltree, rtree } => {
+    //                if elt < val {
+    //                    ltree.member(&elt)
+    //                } else if elt > val {
+    //                    rtree.member(&elt)
+    //                } else {
+    //                    true
+    //                }
+    //            }
+    //        }
+    //    }
+
+    // Exercise 2.2
+
     fn member(&self, elt: &T) -> bool {
-        match self {
-            Empty => false,
-            Node { val, ltree, rtree } => {
-                if elt < val {
-                    ltree.member(&elt)
-                } else if elt > val {
-                    rtree.member(&elt)
-                } else {
-                    true
+        fn member_impl<T: Clone + PartialOrd>(tree: &Tree<T>, elt: &T, possible: &T) -> bool {
+            match tree {
+                Empty => elt == possible,
+                Node { val, ltree, rtree } => {
+                    if elt <= val {
+                        member_impl(&ltree, &elt, &val)
+                    } else {
+                        member_impl(&rtree, &elt, &possible)
+                    }
                 }
             }
+        }
+        match self {
+            Empty => false,
+            Node { val, .. } => member_impl(&self, &elt, &val),
         }
     }
 }
@@ -74,7 +97,7 @@ mod tests {
 
     #[test]
     fn tree_test() {
-        let tree: Tree<i32> = Tree::empty().insert(0).insert(1);
+        let tree: Tree<i32> = Tree::empty().insert(0).insert(1).insert(3);
         assert_eq!(tree.member(&0), true);
         assert_eq!(tree.member(&1), true);
         assert_eq!(tree.member(&2), false);

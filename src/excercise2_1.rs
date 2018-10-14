@@ -1,6 +1,7 @@
 use std::collections::LinkedList;
 
 /// Returns a list of suffixes sorted in descending order of length
+#[allow(dead_code)]
 fn suffixes<T: Clone>(lst: &LinkedList<T>) -> LinkedList<LinkedList<T>> {
     let mut suf_lst = LinkedList::new();
     let mut rest_lst = lst.clone();
