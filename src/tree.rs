@@ -4,12 +4,14 @@ trait Set<T> {
     fn member(&self, elt: &T) -> bool;
 }
 
+use std::rc::Rc;
+
 #[derive(Clone)]
 enum Tree<T: Clone> {
     Node {
         val: T,
-        ltree: Box<Tree<T>>,
-        rtree: Box<Tree<T>>,
+        ltree: Rc<Tree<T>>,
+        rtree: Rc<Tree<T>>,
     },
     Empty,
 }
@@ -28,21 +30,21 @@ where
         match self {
             Empty => Node {
                 val: elt,
-                ltree: Box::new(Empty),
-                rtree: Box::new(Empty),
+                ltree: Rc::new(Empty),
+                rtree: Rc::new(Empty),
             },
             Node { val, ltree, rtree } => {
                 if elt < *val {
                     Node {
                         val: val.clone(),
-                        ltree: Box::new(ltree.insert(elt)),
-                        rtree: Box::new(*rtree.clone()),
+                        ltree: Rc::new(ltree.insert(elt)),
+                        rtree: Rc::clone(&rtree),
                     }
                 } else if elt > *val {
                     Node {
                         val: val.clone(),
-                        ltree: Box::new(*ltree.clone()),
-                        rtree: Box::new(rtree.insert(elt)),
+                        ltree: Rc::clone(&ltree),
+                        rtree: Rc::new(rtree.insert(elt)),
                     }
                 } else {
                     self.clone()
