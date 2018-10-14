@@ -26,30 +26,73 @@ where
         Empty
     }
 
+    // Section 2.2 first version
+
+    //    fn insert(&self, elt: T) -> Tree<T> {
+    //        match self {
+    //            Empty => Node {
+    //                val: elt,
+    //                ltree: Rc::new(Empty),
+    //                rtree: Rc::new(Empty),
+    //            },
+    //            Node { val, ltree, rtree } => {
+    //                if elt < *val {
+    //                    Node {
+    //                        val: val.clone(),
+    //                        ltree: Rc::new(ltree.insert(elt)),
+    //                        rtree: Rc::clone(&rtree),
+    //                    }
+    //                } else if elt > *val {
+    //                    Node {
+    //                        val: val.clone(),
+    //                        ltree: Rc::clone(&ltree),
+    //                        rtree: Rc::new(rtree.insert(elt)),
+    //                    }
+    //                } else {
+    //                    self.clone()
+    //                }
+    //            }
+    //        }
+    //    }
+
+    // Exercise 2.3
+
     fn insert(&self, elt: T) -> Tree<T> {
-        match self {
-            Empty => Node {
-                val: elt,
-                ltree: Rc::new(Empty),
-                rtree: Rc::new(Empty),
-            },
-            Node { val, ltree, rtree } => {
-                if elt < *val {
-                    Node {
-                        val: val.clone(),
-                        ltree: Rc::new(ltree.insert(elt)),
-                        rtree: Rc::clone(&rtree),
+        fn insert_impl<T: Clone + PartialOrd>(tree: &Tree<T>, elt: T) -> Option<Tree<T>> {
+            match tree {
+                Empty => Some(Node {
+                    val: elt,
+                    ltree: Rc::new(Empty),
+                    rtree: Rc::new(Empty),
+                }),
+                Node { val, ltree, rtree } => {
+                    if elt < *val {
+                        insert_impl(&ltree, elt).map(|x| {
+                            Node {
+                                val: val.clone(),
+                                ltree: Rc::new(x),
+                                rtree: Rc::clone(&rtree),
+                            }
+                        })
+                    } else if elt > *val {
+                        insert_impl(&rtree, elt).map(|x| {
+                            Node {
+                                val: val.clone(),
+                                ltree: Rc::clone(&ltree),
+                                rtree: Rc::new(x),
+                            }
+                        })
+                    } else {
+                        None
                     }
-                } else if elt > *val {
-                    Node {
-                        val: val.clone(),
-                        ltree: Rc::clone(&ltree),
-                        rtree: Rc::new(rtree.insert(elt)),
-                    }
-                } else {
-                    self.clone()
                 }
             }
+        }
+
+
+        match insert_impl(&self, elt) {
+            Some(x) => x,
+            None => self.clone(),
         }
     }
 
@@ -99,10 +142,11 @@ mod tests {
 
     #[test]
     fn tree_test() {
-        let tree: Tree<i32> = Tree::empty().insert(0).insert(1).insert(3);
+        let tree = Tree::empty().insert(0).insert(1).insert(3);
         assert_eq!(tree.member(&0), true);
         assert_eq!(tree.member(&1), true);
         assert_eq!(tree.member(&2), false);
+        assert_eq!(tree.member(&3), true);
     }
 
 }
