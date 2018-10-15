@@ -1,3 +1,5 @@
+// Section 2.2
+
 trait Set<T> {
     fn empty() -> Self;
     fn insert(&self, elf: T) -> Self;
@@ -6,7 +8,7 @@ trait Set<T> {
 
 use std::rc::Rc;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 enum Tree<T: Clone> {
     Node {
         val: T,
@@ -20,7 +22,7 @@ use self::Tree::*;
 
 impl<T> Set<T> for Tree<T>
 where
-    T: Clone + PartialOrd,
+    T: Clone + PartialOrd + std::fmt::Debug,
 {
     fn empty() -> Tree<T> {
         Empty
@@ -57,45 +59,100 @@ where
 
     // Exercise 2.3
 
+    //    fn insert(&self, elt: T) -> Tree<T> {
+    //        fn insert_impl<T: Clone + PartialOrd>(tree: &Tree<T>, elt: T) -> Option<Tree<T>> {
+    //            match tree {
+    //                Empty => Some(Node {
+    //                    val: elt,
+    //                    ltree: Rc::new(Empty),
+    //                    rtree: Rc::new(Empty),
+    //                }),
+    //                Node { val, ltree, rtree } => {
+    //                    if elt < *val {
+    //                        insert_impl(&ltree, elt).map(|x| {
+    //                            Node {
+    //                                val: val.clone(),
+    //                                ltree: Rc::new(x),
+    //                                rtree: Rc::clone(&rtree),
+    //                            }
+    //                        })
+    //                    } else if elt > *val {
+    //                        insert_impl(&rtree, elt).map(|x| {
+    //                            Node {
+    //                                val: val.clone(),
+    //                                ltree: Rc::clone(&ltree),
+    //                                rtree: Rc::new(x),
+    //                            }
+    //                        })
+    //                    } else {
+    //                        None
+    //                    }
+    //                }
+    //            }
+    //        }
+
+    //    match insert_impl(&self, elt) {
+    //        Some(x) => x,
+    //        None => self.clone(),
+    //    }
+    //}
+
+    // Exercise 2.4
+
     fn insert(&self, elt: T) -> Tree<T> {
-        fn insert_impl<T: Clone + PartialOrd>(tree: &Tree<T>, elt: T) -> Option<Tree<T>> {
+        fn insert_impl<T: Clone + PartialOrd>(
+            tree: &Tree<T>,
+            elt: T,
+            possible: &T,
+        ) -> Option<Tree<T>> {
             match tree {
-                Empty => Some(Node {
-                    val: elt,
-                    ltree: Rc::new(Empty),
-                    rtree: Rc::new(Empty),
-                }),
+                Empty => {
+                    if elt == *possible {
+                        None
+                    } else {
+                        Some(Node {
+                            val: elt,
+                            ltree: Rc::new(Empty),
+                            rtree: Rc::new(Empty),
+                        })
+                    }
+                }
                 Node { val, ltree, rtree } => {
-                    if elt < *val {
-                        insert_impl(&ltree, elt).map(|x| {
+                    if elt <= *val {
+                        insert_impl(&ltree, elt, &val).map(|x| {
                             Node {
                                 val: val.clone(),
                                 ltree: Rc::new(x),
                                 rtree: Rc::clone(&rtree),
                             }
                         })
-                    } else if elt > *val {
-                        insert_impl(&rtree, elt).map(|x| {
+                    } else {
+                        insert_impl(&rtree, elt, &possible).map(|x| {
                             Node {
                                 val: val.clone(),
                                 ltree: Rc::clone(&ltree),
                                 rtree: Rc::new(x),
                             }
                         })
-                    } else {
-                        None
                     }
                 }
             }
         }
 
-
-        match insert_impl(&self, elt) {
-            Some(x) => x,
-            None => self.clone(),
+        match self {
+            Empty => Node {
+                val: elt,
+                ltree: Rc::new(Empty),
+                rtree: Rc::new(Empty),
+            },
+            Node { val, .. } => {
+                match insert_impl(&self, elt, &val) {
+                    Some(x) => x,
+                    None => self.clone(),
+                }
+            }
         }
     }
-
     // Section 2.2 first version
 
     //    fn member(&self, elt: &T) -> bool {
@@ -128,6 +185,7 @@ where
                 }
             }
         }
+
         match self {
             Empty => false,
             Node { val, .. } => member_impl(&self, &elt, &val),
@@ -142,7 +200,8 @@ mod tests {
 
     #[test]
     fn tree_test() {
-        let tree = Tree::empty().insert(0).insert(1).insert(3);
+        let tree = Tree::empty().insert(1).insert(3).insert(0).insert(1);
+        println!("{:?}", &tree);
         assert_eq!(tree.member(&0), true);
         assert_eq!(tree.member(&1), true);
         assert_eq!(tree.member(&2), false);
