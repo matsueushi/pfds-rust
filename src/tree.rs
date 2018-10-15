@@ -192,6 +192,7 @@ impl<T: Clone + PartialOrd> Set<T> for Tree<T> {
 }
 
 // Exercise 2.5 (a)
+#[allow(dead_code)]
 fn complete<T: Clone + PartialOrd>(elt: T, len: u32) -> Tree<T> {
     match len {
         0 => Empty,
@@ -201,6 +202,32 @@ fn complete<T: Clone + PartialOrd>(elt: T, len: u32) -> Tree<T> {
                 val: elt,
                 ltree: Rc::clone(&subtree),
                 rtree: Rc::clone(&subtree),
+            }
+        }
+    }
+}
+
+// Exercise 2.5 (b)
+#[allow(dead_code)]
+fn complete_size<T: Clone + PartialOrd>(elt: T, size: u32) -> Tree<T> {
+    match size {
+        0 => Empty,
+        _ => {
+            let lsize = (size - 1) / 2;
+            let rsize = size - 1 - lsize;
+            if lsize == rsize {
+                let subtree = Rc::new(complete_size(elt.clone(), lsize));
+                Node {
+                    val: elt,
+                    ltree: Rc::clone(&subtree),
+                    rtree: Rc::clone(&subtree),
+                }
+            } else {
+                Node {
+                    val: elt.clone(),
+                    ltree: Rc::new(complete_size(elt.clone(), lsize)),
+                    rtree: Rc::new(complete_size(elt, rsize)),
+                }
             }
         }
     }
@@ -225,5 +252,7 @@ mod tests {
     fn complete_test() {
         let tree = complete(1, 2);
         println!("{:?}", &tree);
+        let tree_complete = complete_size(1, 9);
+        println!("{:?}", &tree_complete);
     }
 }
