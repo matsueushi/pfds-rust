@@ -20,10 +20,7 @@ enum Tree<T: Clone> {
 
 use self::Tree::*;
 
-impl<T> Set<T> for Tree<T>
-where
-    T: Clone + PartialOrd + std::fmt::Debug,
-{
+impl<T: Clone + PartialOrd> Set<T> for Tree<T> {
     fn empty() -> Tree<T> {
         Empty
     }
@@ -90,7 +87,7 @@ where
     //                }
     //            }
     //        }
-
+    //
     //    match insert_impl(&self, elt) {
     //        Some(x) => x,
     //        None => self.clone(),
@@ -153,6 +150,7 @@ where
             }
         }
     }
+
     // Section 2.2 first version
 
     //    fn member(&self, elt: &T) -> bool {
@@ -193,6 +191,21 @@ where
     }
 }
 
+// Exercise 2.5 (a)
+fn complete<T: Clone + PartialOrd>(elt: T, len: u32) -> Tree<T> {
+    match len {
+        0 => Empty,
+        _ => {
+            let subtree = Rc::new(complete(elt.clone(), len - 1));
+            Node {
+                val: elt,
+                ltree: Rc::clone(&subtree),
+                rtree: Rc::clone(&subtree),
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -208,4 +221,9 @@ mod tests {
         assert_eq!(tree.member(&3), true);
     }
 
+    #[test]
+    fn complete_test() {
+        let tree = complete(1, 2);
+        println!("{:?}", &tree);
+    }
 }
