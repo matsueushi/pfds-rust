@@ -1,3 +1,4 @@
-pub mod stack;
-pub mod tree;
+mod stack;
+mod tree;
+mod treemap;
 mod excercise2_1;

@@ -2,7 +2,7 @@
 
 trait Set<T> {
     fn empty() -> Self;
-    fn insert(&self, elf: T) -> Self;
+    fn insert(&self, elt: T) -> Self;
     fn member(&self, elt: &T) -> bool;
 }
 
