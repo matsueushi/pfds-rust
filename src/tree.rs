@@ -9,7 +9,7 @@ trait Set<T> {
 use std::rc::Rc;
 
 #[derive(Clone, Debug)]
-enum Tree<T: Clone> {
+pub enum Tree<T: Clone> {
     Node {
         val: T,
         ltree: Rc<Tree<T>>,
