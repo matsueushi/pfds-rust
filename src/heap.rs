@@ -26,7 +26,7 @@ pub enum LeftistHeap<T: Clone> {
 
 use self::LeftistHeap::*;
 
-impl<T: Clone + PartialOrd + std::fmt::Display> Heap<T> for LeftistHeap<T> {
+impl<T: Clone + PartialOrd> Heap<T> for LeftistHeap<T> {
     fn empty() -> LeftistHeap<T> {
         Empty
     }
@@ -51,7 +51,6 @@ impl<T: Clone + PartialOrd + std::fmt::Display> Heap<T> for LeftistHeap<T> {
             ltree: Rc<LeftistHeap<T>>,
             rtree: Rc<LeftistHeap<T>>,
         ) -> LeftistHeap<T> {
-            println!("{},{}", rank(&*ltree), rank(&*rtree));
             if rank(&*ltree) >= rank(&*rtree) {
                 Node {
                     rank: rank(&*rtree) + 1,
@@ -84,7 +83,6 @@ impl<T: Clone + PartialOrd + std::fmt::Display> Heap<T> for LeftistHeap<T> {
                     ltree: ltree2,
                     rtree: rtree2,
                 } => {
-                    println!("x,y: {}.{}", &x, &y);
                     if x <= y {
                         make_tree(x.clone(), ltree1.clone(), Rc::new(rtree1.merge(other)))
                     } else {
