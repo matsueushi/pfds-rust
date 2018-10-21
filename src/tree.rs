@@ -116,20 +116,16 @@ impl<T: Clone + PartialOrd> Set<T> for Tree<T> {
                 }
                 Node { val, ltree, rtree } => {
                     if elt <= *val {
-                        insert_impl(&ltree, elt, &val).map(|x| {
-                            Node {
-                                val: val.clone(),
-                                ltree: Rc::new(x),
-                                rtree: Rc::clone(&rtree),
-                            }
+                        insert_impl(&ltree, elt, &val).map(|x| Node {
+                            val: val.clone(),
+                            ltree: Rc::new(x),
+                            rtree: Rc::clone(&rtree),
                         })
                     } else {
-                        insert_impl(&rtree, elt, &possible).map(|x| {
-                            Node {
-                                val: val.clone(),
-                                ltree: Rc::clone(&ltree),
-                                rtree: Rc::new(x),
-                            }
+                        insert_impl(&rtree, elt, &possible).map(|x| Node {
+                            val: val.clone(),
+                            ltree: Rc::clone(&ltree),
+                            rtree: Rc::new(x),
                         })
                     }
                 }
@@ -142,12 +138,10 @@ impl<T: Clone + PartialOrd> Set<T> for Tree<T> {
                 ltree: Rc::new(Empty),
                 rtree: Rc::new(Empty),
             },
-            Node { val, .. } => {
-                match insert_impl(&self, elt, &val) {
-                    Some(x) => x,
-                    None => self.clone(),
-                }
-            }
+            Node { val, .. } => match insert_impl(&self, elt, &val) {
+                Some(x) => x,
+                None => self.clone(),
+            },
         }
     }
 
@@ -242,17 +236,17 @@ mod tests {
     fn tree_test() {
         let tree = Tree::empty().insert(1).insert(3).insert(0).insert(1);
         println!("{:?}", &tree);
-        assert_eq!(tree.member(&0), true);
-        assert_eq!(tree.member(&1), true);
-        assert_eq!(tree.member(&2), false);
-        assert_eq!(tree.member(&3), true);
+        assert!(tree.member(&0));
+        assert!(tree.member(&1));
+        assert!(!tree.member(&2));
+        assert!(tree.member(&3));
     }
 
     #[test]
     fn complete_test() {
         let tree = complete(1, 2);
-        println!("{:?}", &tree);
+        println!("tree: {:?}", &tree);
         let tree_complete = complete_size(1, 9);
-        println!("{:?}", &tree_complete);
+        println!("tree: {:?}", &tree_complete);
     }
 }
