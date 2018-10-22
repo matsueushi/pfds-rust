@@ -26,6 +26,24 @@ pub enum LeftistHeap<T: Clone> {
 
 use self::LeftistHeap::*;
 
+impl<T: Clone> LeftistHeap<T> {
+    fn rank(&self) -> u32 {
+        match self {
+            Empty => 0,
+            Node { rank, .. } => *rank,
+        }
+    }
+
+    fn singleton(elt: T) -> LeftistHeap<T> {
+        Node {
+            rank: 1,
+            val: elt,
+            ltree: Rc::new(Empty),
+            rtree: Rc::new(Empty),
+        }
+    }
+}
+
 impl<T: Clone + PartialOrd> Heap<T> for LeftistHeap<T> {
     fn empty() -> LeftistHeap<T> {
         Empty
@@ -39,28 +57,21 @@ impl<T: Clone + PartialOrd> Heap<T> for LeftistHeap<T> {
     }
 
     fn merge(&self, other: &LeftistHeap<T>) -> LeftistHeap<T> {
-        fn rank<T: Clone + PartialOrd>(heap: &LeftistHeap<T>) -> u32 {
-            match heap {
-                Empty => 0,
-                Node { rank, .. } => *rank,
-            }
-        }
-
         fn make_tree<T: Clone + PartialOrd>(
             val: T,
             ltree: Rc<LeftistHeap<T>>,
             rtree: Rc<LeftistHeap<T>>,
         ) -> LeftistHeap<T> {
-            if rank(&*ltree) >= rank(&*rtree) {
+            if ltree.rank() >= rtree.rank() {
                 Node {
-                    rank: rank(&*rtree) + 1,
+                    rank: rtree.rank() + 1,
                     val: val,
                     ltree: ltree,
                     rtree: rtree,
                 }
             } else {
                 Node {
-                    rank: rank(&*ltree) + 1,
+                    rank: ltree.rank() + 1,
                     val: val,
                     ltree: rtree,
                     rtree: ltree,
@@ -93,15 +104,18 @@ impl<T: Clone + PartialOrd> Heap<T> for LeftistHeap<T> {
         }
     }
 
+    // Section 3.1 original version
     fn insert(&self, elt: T) -> Self {
-        Node {
-            rank: 1,
-            val: elt,
-            ltree: Rc::new(Empty),
-            rtree: Rc::new(Empty),
-        }
-        .merge(self)
+        Self::singleton(elt).merge(self)
     }
+
+    // Excercise 3.2
+    // fn insert(&self,elt:T)->Self{
+    //     match self{
+    //         Empty=>
+    //     }
+
+    // }
 
     fn find_min(&self) -> Option<&T> {
         match self {
