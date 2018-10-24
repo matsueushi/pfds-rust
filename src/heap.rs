@@ -34,7 +34,7 @@ impl<T: Clone> LeftistHeap<T> {
         }
     }
 
-    fn singleton(elt: T) -> LeftistHeap<T> {
+    fn singleton(elt: T) -> Self {
         Node {
             rank: 1,
             val: elt,
@@ -45,7 +45,7 @@ impl<T: Clone> LeftistHeap<T> {
 }
 
 impl<T: Clone + PartialOrd> Heap<T> for LeftistHeap<T> {
-    fn empty() -> LeftistHeap<T> {
+    fn empty() -> Self {
         Empty
     }
 
@@ -56,7 +56,7 @@ impl<T: Clone + PartialOrd> Heap<T> for LeftistHeap<T> {
         }
     }
 
-    fn merge(&self, other: &LeftistHeap<T>) -> LeftistHeap<T> {
+    fn merge(&self, other: &LeftistHeap<T>) -> Self {
         fn make_tree<T: Clone + PartialOrd>(
             val: T,
             ltree: Rc<LeftistHeap<T>>,
@@ -105,17 +105,61 @@ impl<T: Clone + PartialOrd> Heap<T> for LeftistHeap<T> {
     }
 
     // Section 3.1 original version
-    fn insert(&self, elt: T) -> Self {
-        Self::singleton(elt).merge(self)
-    }
 
-    // Excercise 3.2
-    // fn insert(&self,elt:T)->Self{
-    //     match self{
-    //         Empty=>
-    //     }
-
+    // fn insert(&self, elt: T) -> Self {
+    //     Self::singleton(elt).merge(self)
     // }
+
+    // Section 3.2
+
+    fn insert(&self, elt: T) -> Self {
+        match self {
+            Empty => Self::singleton(elt),
+            Node {
+                rank: _,
+                val,
+                ltree,
+                rtree,
+            } => {
+                let (t, b) = match elt <= *val {
+                    true => (&elt, val),
+                    false => (val, &elt),
+                };
+                let (lt, rt) = match **rtree {
+                    Empty => (*ltree, Self::singleton(*b)),
+                    Node {
+                        rank: _, val: y2, ..
+                    } => {
+                        if let Node {
+                            rank: _, val: y1, ..
+                        } = self
+                        {
+                            if y1 <= y2 {
+                                (*ltree, Rc::new(rtree.insert(b)))
+                            } else {
+                                (Rc::new(ltree.insert(b)), *rtree)
+                            }
+                        }
+                    }
+                };
+                if lt.rank() >= rt.rank() {
+                    Node {
+                        rank: rt.rank() + 1,
+                        val: *t,
+                        ltree: lt,
+                        rtree: rt,
+                    }
+                } else {
+                    Node {
+                        rank: lt.rank() + 1,
+                        val: *t,
+                        ltree: rt,
+                        rtree: lt,
+                    }
+                }
+            }
+        }
+    }
 
     fn find_min(&self) -> Option<&T> {
         match self {

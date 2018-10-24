@@ -31,13 +31,13 @@ impl<T: Clone> Tree<T> {
 }
 
 impl<T: Clone + PartialOrd> Set<T> for Tree<T> {
-    fn empty() -> Tree<T> {
+    fn empty() -> Self {
         Empty
     }
 
     // Section 2.2 first version
 
-    // fn insert(&self, elt: T) -> Tree<T> {
+    // fn insert(&self, elt: T) -> Self {
     //     match self {
     //         Empty => Self::singleton(elt),
     //         Node { val, ltree, rtree } => {
@@ -62,7 +62,7 @@ impl<T: Clone + PartialOrd> Set<T> for Tree<T> {
 
     // Exercise 2.3
 
-    // fn insert(&self, elt: T) -> Tree<T> {
+    // fn insert(&self, elt: T) -> Self {
     //     fn insert_impl<T: Clone + PartialOrd>(tree: &Tree<T>, elt: T) -> Option<Tree<T>> {
     //         match tree {
     //             Empty => Some(Tree::singleton(elt)),
