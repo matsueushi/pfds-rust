@@ -58,21 +58,21 @@ impl<T: Clone + PartialOrd> Heap<T> for LeftistHeap<T> {
 
     fn merge(&self, other: &LeftistHeap<T>) -> Self {
         fn make_tree<T: Clone + PartialOrd>(
-            val: T,
+            val: &T,
             ltree: Rc<LeftistHeap<T>>,
             rtree: Rc<LeftistHeap<T>>,
         ) -> LeftistHeap<T> {
             if ltree.rank() >= rtree.rank() {
                 Node {
                     rank: rtree.rank() + 1,
-                    val: val,
+                    val: val.clone(),
                     ltree: ltree,
                     rtree: rtree,
                 }
             } else {
                 Node {
                     rank: ltree.rank() + 1,
-                    val: val,
+                    val: val.clone(),
                     ltree: rtree,
                     rtree: ltree,
                 }
@@ -95,9 +95,9 @@ impl<T: Clone + PartialOrd> Heap<T> for LeftistHeap<T> {
                     rtree: rtree2,
                 } => {
                     if x <= y {
-                        make_tree(x.clone(), ltree1.clone(), Rc::new(rtree1.merge(other)))
+                        make_tree(x, Rc::clone(ltree1), Rc::new(rtree1.merge(other)))
                     } else {
-                        make_tree(y.clone(), ltree2.clone(), Rc::new(self.merge(rtree2)))
+                        make_tree(y, Rc::clone(ltree2), Rc::new(self.merge(rtree2)))
                     }
                 }
             },
@@ -110,7 +110,7 @@ impl<T: Clone + PartialOrd> Heap<T> for LeftistHeap<T> {
     //     Self::singleton(elt).merge(self)
     // }
 
-    // Section 3.2
+    // Exercise 3.2
 
     fn insert(&self, elt: T) -> Self {
         match self {
@@ -121,41 +121,40 @@ impl<T: Clone + PartialOrd> Heap<T> for LeftistHeap<T> {
                 ltree,
                 rtree,
             } => {
-                let (t, b) = match elt <= *val {
-                    true => (&elt, val),
-                    false => (val, &elt),
+                let mut t = elt;
+                let mut b = val.clone();
+                if t > b {
+                    std::mem::swap(&mut t, &mut b);
                 };
-                let (lt, rt) = match **rtree {
-                    Empty => (*ltree, Self::singleton(*b)),
+                let (mut lt, mut rt) = match **ltree {
+                    Empty => (Rc::new(Empty), Rc::new(Self::singleton(b))), // ltree = rtree = Empty
                     Node {
-                        rank: _, val: y2, ..
-                    } => {
-                        if let Node {
-                            rank: _, val: y1, ..
-                        } = self
-                        {
+                        rank: _,
+                        val: ref y1,
+                        ..
+                    } => match **rtree {
+                        Empty => (Rc::clone(ltree), Rc::new(Self::singleton(b))),
+                        Node {
+                            rank: _,
+                            val: ref y2,
+                            ..
+                        } => {
                             if y1 <= y2 {
-                                (*ltree, Rc::new(rtree.insert(b)))
+                                (Rc::clone(ltree), Rc::new(rtree.insert(b)))
                             } else {
-                                (Rc::new(ltree.insert(b)), *rtree)
+                                (Rc::new(ltree.insert(b)), Rc::clone(rtree))
                             }
                         }
-                    }
+                    },
                 };
-                if lt.rank() >= rt.rank() {
-                    Node {
-                        rank: rt.rank() + 1,
-                        val: *t,
-                        ltree: lt,
-                        rtree: rt,
-                    }
-                } else {
-                    Node {
-                        rank: lt.rank() + 1,
-                        val: *t,
-                        ltree: rt,
-                        rtree: lt,
-                    }
+                if lt.rank() < rt.rank() {
+                    std::mem::swap(&mut lt, &mut rt);
+                };
+                Node {
+                    rank: rt.rank() + 1,
+                    val: t,
+                    ltree: lt,
+                    rtree: rt,
                 }
             }
         }
@@ -195,11 +194,17 @@ mod test {
         println!("heap: {:?}", &heap);
 
         let heap2 = LeftistHeap::empty().insert(5).insert(1).insert(3);
+        println!("heap2: {:?}", &heap2);
+
         let heap3 = heap.merge(&heap2);
         println!("heap3: {:?}", &heap3);
 
         assert_eq!(heap3.find_min(), Some(&0));
 
         println!("delete_min: {:?}", heap3.delete_min());
+
+        let heap4 = LeftistHeap::empty().insert(1);
+        let heap5 = heap4.merge(&heap2);
+        println!("heap5: {:?}", &heap5);
     }
 }
